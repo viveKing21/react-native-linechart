@@ -1,5 +1,5 @@
 {
-  "name": "react-native-linechart",
+  "name": "rn-linehart",
   "version": "1.0.0",
   "description": "A lightweight and customizable line chart component for React Native, enabling easy data visualization with interactive tooltips and responsive design.",
   "main": "lib/index.js",
@@ -11,10 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/viveKing21/react-native-linechart.git"
+    "url": "git+https://github.com/viveKing21/rn-linehart.git"
   },
   "keywords": [
-    "react-native-linechart",
+    "rn-chartline",
     "linechart",
     "graph",
     "react-native",
@@ -23,13 +23,13 @@
   "author": "Vivek Sharma <sharma.vivek.dev@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/viveKing21/react-native-linechart/issues"
+    "url": "https://github.com/viveKing21/rn-linehart/issues"
   },
   "dependencies": {
     "react": "^18.2.0",
     "react-native": "^0.74.3"
   },
-  "homepage": "https://github.com/viveKing21/react-native-linechart/blob/main/README.md",
+  "homepage": "https://github.com/viveKing21/rn-linechart#readme",
   "files": [
     "lib/**/*"
   ],
