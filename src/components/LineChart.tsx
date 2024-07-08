@@ -1,6 +1,6 @@
 import { Animated, NativeScrollEvent, NativeSyntheticEvent, NativeTouchEvent, ScrollView, Text, View } from 'react-native'
 import React, { PureComponent, createRef } from 'react'
-import { Circle, Defs, G, Line, LinearGradient, Mask, Path,Rect,Stop, Svg } from 'react-native-svg'
+import { Circle, Defs, G, Line, LinearGradient, Mask, Path, Rect, Stop, Svg } from 'react-native-svg'
 import { TYPE, LineChartProps, LineChartStates, POSITION, Dataset } from './types'
 
 type SvgLayoutType = {
@@ -36,8 +36,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         dotRadius: 3,
         areaOpacity: 1,
         areaGradients: [
-            {offset: 0, color: 'grey', opacity: 1},
-            {offset: 100, color: 'lightgrey', opacity: .6}
+            { offset: 0, color: 'grey', opacity: 1 },
+            { offset: 100, color: 'lightgrey', opacity: .6 }
         ],
         toolTipLineColor: "black",
         toolTipLineWidth: 1,
@@ -54,14 +54,14 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         clippedBorderBackground: 'white',
     }
 
-    xAxisScrollViewRef = createRef<ScrollView>()
-    scrollViewRef = createRef<ScrollView>()
-    toolTipRef = createRef<View>()
+    xAxisScrollViewRef;
+    scrollViewRef;
+    toolTipRef;
 
-    toolTipPositionAnimation = new Animated.ValueXY({x: 0, y: 0})
-    toolTipOpacityAnimation = new Animated.Value(0)
+    toolTipPositionAnimation;
+    toolTipOpacityAnimation;
 
-    toolTipIndexPrev = 0
+    toolTipIndexPrev;
 
     constructor(props: LineChartProps) {
         super(props)
@@ -73,34 +73,47 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             viewY: 0,
             toolTipIndex: 0
         }
+
+        this.toolTipPositionAnimation = new Animated.ValueXY({ x: 0, y: 0 })
+        this.toolTipOpacityAnimation = new Animated.Value(0)
+
+        this.xAxisScrollViewRef = createRef<ScrollView>()
+        this.scrollViewRef = createRef<ScrollView>()
+        this.toolTipRef = createRef<View>()
+
+        this.toolTipIndexPrev = 0
     }
     componentDidUpdate(prevPops: Readonly<LineChartProps>) {
-        if(prevPops.datasets != this.props.datasets) {
-            this.setState({toolTipIndex: 0})
+        if (prevPops.datasets != this.props.datasets) {
+            this.setState({ toolTipIndex: 0 })
             this.toolTipOpacityAnimation.setValue(0)
-            this.toolTipPositionAnimation.setValue({x: 0, y: 0})
-            this.scrollViewRef.current?.scrollTo({x: 0, animated: false})
+            this.toolTipPositionAnimation.setValue({ x: 0, y: 0 })
+            this.scrollViewRef.current?.scrollTo({ x: 0, animated: false })
         }
     }
+    componentWillUnmount(): void {
+        this.toolTipOpacityAnimation.stopAnimation()
+        this.toolTipPositionAnimation.stopAnimation()
+    }
     getProperty(key: keyof LineChartProps): any {
-        switch(key){
+        switch (key) {
             case 'verticalLineWidth':
-                if(this.props.hideVerticalLines) return 0
+                if (this.props.hideVerticalLines) return 0
                 break
             case 'horizontalLineWidth':
-                if(this.props.hideHorizontalLines) return 0
+                if (this.props.hideHorizontalLines) return 0
                 break
             case 'xAxisLableInset':
-                if('xAxisLables' in this.props == false) return false
+                if ('xAxisLables' in this.props == false) return false
                 break
             case 'xAxisLableEqualInset':
-                if(this.getProperty('xAxisLableInset') == false) return false
+                if (this.getProperty('xAxisLableInset') == false) return false
                 break
             case 'borderWidth':
-                if('borderWidth' in this.props == false) return this.getProperty('verticalLineWidth')
+                if ('borderWidth' in this.props == false) return this.getProperty('verticalLineWidth')
                 break
             case 'borderColor':
-                if('borderColor' in this.props == false) return this.getProperty('verticalLineColor')
+                if ('borderColor' in this.props == false) return this.getProperty('verticalLineColor')
         }
 
         if (key in this.props) return this.props[key]
@@ -114,11 +127,11 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
 
         return {
             maxLength() {
-                return dataset.reduce((acc, {values}) => Math.max(acc, values.length), -Infinity)
+                return dataset.reduce((acc, { values }) => Math.max(acc, values.length), -Infinity)
             }
         }
     }
-    getPath(data: number[], svgLayout: SvgLayoutType){
+    getPath(data: number[], svgLayout: SvgLayoutType) {
         let path = ''
 
         let moveX = 0
@@ -135,74 +148,74 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
 
         let { viewX, viewY, viewHeight, cellWidth } = this.getSvgLayout()
 
-        if(inset){
+        if (inset) {
             moveX = viewX + halfVerticalLineWidth
             moveY = viewY + viewHeight + halfHorizontalLineWidth
             previousX = moveX
             previousY = moveY
         }
 
-        for(let index = 0; index < data.length; index++){
+        for (let index = 0; index < data.length; index++) {
             let value = Math.max(this.props.minimumValue, Math.min(this.props.maximumValue, data[index]))
-            let {x, y} = this.getCoords(value, index)
+            let { x, y } = this.getCoords(value, index)
 
-            if(index == 0){
+            if (index == 0) {
                 x -= halfVerticalLineWidth
             }
-            if(index == data.length-1){
+            if (index == data.length - 1) {
                 x += halfVerticalLineWidth
             }
 
-            if(index == 0 && !inset){
+            if (index == 0 && !inset) {
                 moveX = x
                 moveY = y
-            }else{
-                if(type == TYPE.LINE) path += `L${x} ${y} `
-                else if(type == TYPE.QUADRATIC_BEZIER) path += `Q${(previousX + x) / 2} ${y}, ${x} ${y} `
-                else if(type == TYPE.CUBIC_BEZIER) path += `C${(previousX + x) / 2} ${previousY}, ${(previousX + x) / 2} ${y}, ${x} ${y} `
+            } else {
+                if (type == TYPE.LINE) path += `L${x} ${y} `
+                else if (type == TYPE.QUADRATIC_BEZIER) path += `Q${(previousX + x) / 2} ${y}, ${x} ${y} `
+                else if (type == TYPE.CUBIC_BEZIER) path += `C${(previousX + x) / 2} ${previousY}, ${(previousX + x) / 2} ${y}, ${x} ${y} `
             }
 
             previousX = x
             previousY = y
         }
 
-        if(inset){
-            let xAxisLableLeft = this.getProperty('xAxisLableInset') ? ((this.props.xAxisLableWidth || cellWidth) / 2):0
-            if(this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
-            
+        if (inset) {
+            let xAxisLableLeft = this.getProperty('xAxisLableInset') ? ((this.props.xAxisLableWidth || cellWidth) / 2) : 0
+            if (this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
+
             let x = previousX + xAxisLableLeft - halfVerticalLineWidth
             let y = moveY - halfHorizontalLineWidth
-            if(type == TYPE.LINE) path += `L${x} ${y} `
-            else if(type == TYPE.QUADRATIC_BEZIER) path += `Q${(previousX + x) / 2} ${y}, ${x} ${y} `
-            else if(type == TYPE.CUBIC_BEZIER) path += `C${(previousX + x) / 2} ${previousY}, ${(previousX + x) / 2} ${y}, ${x} ${y} `
+            if (type == TYPE.LINE) path += `L${x} ${y} `
+            else if (type == TYPE.QUADRATIC_BEZIER) path += `Q${(previousX + x) / 2} ${y}, ${x} ${y} `
+            else if (type == TYPE.CUBIC_BEZIER) path += `C${(previousX + x) / 2} ${previousY}, ${(previousX + x) / 2} ${y}, ${x} ${y} `
         }
 
         return {
-            strokePath(){
+            strokePath() {
                 return `M${moveX} ${moveY} ${path}`
             },
-            fillingPath(){
-                return `M${moveX} ${viewHeight+viewY+halfHorizontalLineWidth} L${moveX} ${moveY} ${path} L${previousX} ${svgLayout.viewHeight + svgLayout.viewY + halfHorizontalLineWidth} Z`
+            fillingPath() {
+                return `M${moveX} ${viewHeight + viewY + halfHorizontalLineWidth} L${moveX} ${moveY} ${path} L${previousX} ${svgLayout.viewHeight + svgLayout.viewY + halfHorizontalLineWidth} Z`
             }
         }
     }
     getSvgLayout(): SvgLayoutType {
         let { viewHeight: height, viewWidth: width, viewX: svgX } = this.state
         let [hlc, vld, spl, spr, spt, spb, xali] = this.getProperties(
-                                            "horizontalLineCount",
-                                            "verticalLineDistance",
-                                            "svgPaddingLeft", 
-                                            "svgPaddingRight", 
-                                            "svgPaddingTop", 
-                                            "svgPaddingBottom",
-                                            "xAxisLableInset"
-                                        )
-        
+            "horizontalLineCount",
+            "verticalLineDistance",
+            "svgPaddingLeft",
+            "svgPaddingRight",
+            "svgPaddingTop",
+            "svgPaddingBottom",
+            "xAxisLableInset"
+        )
+
         let maxLength = this.getDataSetProperty().maxLength()
 
         let verticalLineWidth = this.getProperty("verticalLineWidth")
         let horizontalLineWidth = this.getProperty("horizontalLineWidth")
-        
+
         let viewHeight = height - (spt + spb) - horizontalLineWidth
         let viewWidth = Math.max(width, (vld || 0) * maxLength) - (spl + spr) - verticalLineWidth
 
@@ -214,15 +227,15 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         let cellHeight = viewHeight / rowCount
         let cellWidth = viewWidth / colCount
 
-        if(this.props.xAxisLables){
+        if (this.props.xAxisLables) {
             let xAxisLableWidth = this.props.xAxisLableWidth || cellWidth
 
-            if(xali){
-                if(this.getProperty('xAxisLableEqualInset')) cellWidth = viewWidth / (colCount + 2)
+            if (xali) {
+                if (this.getProperty('xAxisLableEqualInset')) cellWidth = viewWidth / (colCount + 2)
                 else cellWidth = (viewWidth - xAxisLableWidth) / colCount
             }
             else {
-                if(!this.props.disableAutoAdjustXAxisLablesOverFlow){
+                if (!this.props.disableAutoAdjustXAxisLablesOverFlow) {
                     // fix xAxis lable overflow to left direction
                     let minLeft = Math.max(0, xAxisLableWidth / 2 - svgX)
                     viewX += minLeft
@@ -256,8 +269,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
 
         let { viewHeight, viewX, viewY, cellWidth } = this.getSvgLayout()
 
-        let xAxisLableLeft = this.getProperty('xAxisLableInset') ? ((this.props.xAxisLableWidth || cellWidth) / 2):0
-        if(this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
+        let xAxisLableLeft = this.getProperty('xAxisLableInset') ? ((this.props.xAxisLableWidth || cellWidth) / 2) : 0
+        if (this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
 
         let x = xAxisLableLeft + (index * cellWidth + viewX)
         let y = viewHeight - (value - minimumValue) / (maximumValue - minimumValue) * viewHeight + viewY
@@ -273,27 +286,27 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         let { viewHeight, viewY, rowCount, cellHeight } = this.getSvgLayout()
 
         return (
-            <View style={[{ height: viewHeight, transform: [{translateY: viewY}] }, this.props.yAxisLableContainerStyle]}>
+            <View style={[{ height: viewHeight, transform: [{ translateY: viewY }] }, this.props.yAxisLableContainerStyle]}>
                 {
                     Array.from({ length: rowCount + 1 }, (_, index) => {
                         let lable = (maximumValue - minimumValue) / rowCount * (rowCount - index) + minimumValue
                         let lableText = formatYAxisLable ? formatYAxisLable(lable) : lable.toFixed(2)
                         return (
                             <View key={index} style={{ height: cellHeight }}>
-                                <Text 
-                                style={[
-                                    {
-                                        transform: [{ translateY: -10 }],
-                                        textAlignVertical: 'center',
-                                        fontSize: 10,
-                                        color: 'black',
-                                        height: 20,
-                                        textAlign: 'right'
-                                    },
-                                    this.props.yAxisLableTextStyle
-                                ]}
-                                adjustsFontSizeToFit
-                                {...this.props.yAxisLableTextProps}
+                                <Text
+                                    style={[
+                                        {
+                                            transform: [{ translateY: -10 }],
+                                            textAlignVertical: 'center',
+                                            fontSize: 10,
+                                            color: 'black',
+                                            height: 20,
+                                            textAlign: 'right'
+                                        },
+                                        this.props.yAxisLableTextStyle
+                                    ]}
+                                    adjustsFontSizeToFit
+                                    {...this.props.yAxisLableTextProps}
                                 >
                                     {lableText}
                                 </Text>
@@ -304,8 +317,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             </View>
         )
     }
-    renderXAxisLables(){
-        if(!this.props.xAxisLables) return null
+    renderXAxisLables() {
+        if (!this.props.xAxisLables) return null
 
         let { viewX: svgLeft } = this.state
         let { cellWidth, viewX } = this.getSvgLayout()
@@ -321,11 +334,11 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                     ref={this.xAxisScrollViewRef}
                     style={[
                         {
-                            marginLeft: svgLeft + viewX - (inset ? 0:xAxisLableWidth / 2),
+                            marginLeft: svgLeft + viewX - (inset ? 0 : xAxisLableWidth / 2),
                         },
                         this.props.xAxisLableContainerStyle
                     ]}
-                    contentContainerStyle={{flexGrow: 1}}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     overScrollMode='never'
                     horizontal
                     scrollEnabled={false}
@@ -333,13 +346,13 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                 >
                     {
                         xAxisLables.map((lable, index) => {
-                            let lableText = this.props.formatXAxisLable ? this.props.formatXAxisLable(lable):lable
+                            let lableText = this.props.formatXAxisLable ? this.props.formatXAxisLable(lable) : lable
                             let marginLeft = 0, marginRight = 0
 
-                            if(index == 0) marginLeft = equalInset ? cellWidth:xAxisLableWidth / 2
+                            if (index == 0) marginLeft = equalInset ? cellWidth : xAxisLableWidth / 2
                             else marginLeft = cellWidth - xAxisLableWidth
 
-                            if(index == xAxisLables.length-1){
+                            if (index == xAxisLables.length - 1) {
                                 marginRight = cellWidth - xAxisLableWidth
                             }
 
@@ -354,7 +367,7 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                                             color: 'black',
                                             marginLeft,
                                             marginRight,
-                                            transform: [{translateX: -(xAxisLableWidth / 2)}]
+                                            transform: [{ translateX: -(xAxisLableWidth / 2) }]
                                         },
                                         this.props.xAxisLableTextStyle
                                     ]}
@@ -369,9 +382,9 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             </View>
         )
     }
-    renderLines(){
+    renderLines() {
         let { viewWidth, viewHeight, rowCount, colCount, cellHeight, cellWidth, viewX, viewY } = this.getSvgLayout()
-        
+
         let [hvl, hhl, hlc, hlw, vlc, vlw, hlssd, hlssds, vlssd, vlssds, xali, xalei] = this.getProperties(
             "hideVerticalLines",
             "hideHorizontalLines",
@@ -387,13 +400,13 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             "xAxisLableEqualInset"
         )
 
-        let xAxisLableLeft = xali ? ((this.props.xAxisLableWidth || cellWidth) / 2):0
-        if(xalei) xAxisLableLeft = cellWidth
+        let xAxisLableLeft = xali ? ((this.props.xAxisLableWidth || cellWidth) / 2) : 0
+        if (xalei) xAxisLableLeft = cellWidth
 
         return (
             <G mask={"url(#masking)"}>
                 {
-                    hhl ? null:Array.from({length: rowCount + 1}, (_, index) => {
+                    hhl ? null : Array.from({ length: rowCount + 1 }, (_, index) => {
                         return (
                             <Line
                                 key={index}
@@ -408,8 +421,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                     })
                 }
                 {
-                    hvl ? null:(
-                        Array.from({length: colCount + 1}, (_, index) => {
+                    hvl ? null : (
+                        Array.from({ length: colCount + 1 }, (_, index) => {
                             return (
                                 <Line
                                     key={index}
@@ -427,12 +440,12 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             </G>
         )
     }
-    renderClippedBorder(){
-        if(this.props.hideClippedBorder) return null
+    renderClippedBorder() {
+        if (this.props.hideClippedBorder) return null
 
-        let {viewX: x, viewY: y, viewWidth: width, viewHeight: height} = this.state
+        let { viewX: x, viewY: y, viewWidth: width, viewHeight: height } = this.state
         let { viewX, viewHeight, viewY } = this.getSvgLayout()
-        
+
         let [vlw, hlw, bw, bc, vlc, cbb] = this.getProperties(
             "verticalLineWidth",
             "horizontalLineWidth",
@@ -454,8 +467,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                     borderRightWidth: bw || vlw,
                     borderColor: bc || vlc,
                     transform: [
-                        {translateX: x},
-                        {translateY}
+                        { translateX: x },
+                        { translateY }
                     ]
                 }} />
                 <View style={{
@@ -466,15 +479,15 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                     borderLeftWidth: bw,
                     borderColor: bc,
                     transform: [
-                        {translateX: x + width - viewX},
-                        {translateY}
+                        { translateX: x + width - viewX },
+                        { translateY }
                     ]
                 }} />
             </>
         )
     }
-    renderDots(data: Dataset){
-        if(data.hideDot ?? this.getProperty("hideDot")) return null
+    renderDots(data: Dataset) {
+        if (data.hideDot ?? this.getProperty("hideDot")) return null
 
         return (
             <G>
@@ -505,10 +518,10 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             </G>
         )
     }
-    renderPathsWidthDots(){
+    renderPathsWidthDots() {
         let dataset = this.props.datasets
         let svgLayout = this.getSvgLayout()
-        let paths = dataset.map(({values}) => this.getPath(values, svgLayout))
+        let paths = dataset.map(({ values }) => this.getPath(values, svgLayout))
 
         let verticalLineWidth = this.getProperty("verticalLineWidth")
         let horizontalLineWidth = this.getProperty("horizontalLineWidth")
@@ -518,11 +531,11 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                 <Defs>
                     {
                         <Mask id={`masking`}>
-                            <Rect 
-                                x={svgLayout.viewX - verticalLineWidth / 2} 
-                                y={svgLayout.viewY - horizontalLineWidth / 2} 
-                                width={svgLayout.viewWidth + verticalLineWidth} 
-                                height={svgLayout.viewHeight + horizontalLineWidth} 
+                            <Rect
+                                x={svgLayout.viewX - verticalLineWidth / 2}
+                                y={svgLayout.viewY - horizontalLineWidth / 2}
+                                width={svgLayout.viewWidth + verticalLineWidth}
+                                height={svgLayout.viewHeight + horizontalLineWidth}
                                 fill={'white'}
                             />
                             {
@@ -531,9 +544,9 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                                     let disableArea = data.disableArea ?? this.getProperty("disableArea")
                                     let disableMasking = data.disableMasking ?? this.getProperty("disableMasking") ?? disableArea
 
-                                    if(disableMasking) return null
+                                    if (disableMasking) return null
                                     return (
-                                        <Path key={index} d={path.fillingPath()} fill='black'/>
+                                        <Path key={index} d={path.fillingPath()} fill='black' />
                                     )
                                 })
                             }
@@ -549,11 +562,11 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                             return (
                                 <React.Fragment key={index}>
                                     {
-                                        disableArea || areaColor ? null:(
+                                        disableArea || areaColor ? null : (
                                             <LinearGradient id={`gredient-${index}`} x1="0%" y1="0%" x2="0%" y2="100%" key={index}>
                                                 {
-                                                    areaGredient.map(({offset = 100, color = 'grey', opacity = 1}, index: number) => {
-                                                        return <Stop key={'stop-'+index} offset={offset + '%'} stopColor={color} stopOpacity={opacity}/>
+                                                    areaGredient.map(({ offset = 100, color = 'grey', opacity = 1 }, index: number) => {
+                                                        return <Stop key={'stop-' + index} offset={offset + '%'} stopColor={color} stopOpacity={opacity} />
                                                     })
                                                 }
                                             </LinearGradient>
@@ -578,7 +591,7 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                             return (
                                 <G key={index}>
                                     {
-                                        disableArea ? null:(
+                                        disableArea ? null : (
                                             <Path
                                                 d={path.fillingPath()}
                                                 fill={areaColor || `url(#gredient-${index})`}
@@ -587,8 +600,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                                         )
                                     }
                                     {
-                                        hideLine ? null:(
-                                            <Path 
+                                        hideLine ? null : (
+                                            <Path
                                                 d={path.strokePath()}
                                                 stroke={lineColor}
                                                 strokeWidth={lineWidth}
@@ -605,8 +618,8 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             </>
         )
     }
-    renderToolTip(){
-        if(this.props.disableToolTip) return
+    renderToolTip() {
+        if (this.props.disableToolTip) return
 
         let { viewX, viewY, viewHeight, cellWidth } = this.getSvgLayout()
         let { toolTipIndex } = this.state
@@ -622,144 +635,144 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         ] = this.getProperties(
             'toolTipLineWidth',
             'toolTipLineColor',
-            'toolTipDotColor', 
-            'toolTipDotStrokeColor', 
-            'toolTipDotStrokeWidth', 
+            'toolTipDotColor',
+            'toolTipDotStrokeColor',
+            'toolTipDotStrokeWidth',
             'toolTipDotRadius',
             'xAxisLableInset')
 
-        let xAxisLableLeft = xAxisLableInset ? ((this.props.xAxisLableWidth || cellWidth) / 2):0
-        if(this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
+        let xAxisLableLeft = xAxisLableInset ? ((this.props.xAxisLableWidth || cellWidth) / 2) : 0
+        if (this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
         let xAxisLable = this.props.xAxisLables && this.props.xAxisLables[toolTipIndex]
 
         return (
             <>
-            <Animated.View
-                style={{
-                    position: 'absolute',
-                    top: viewY,
-                    left: xAxisLableLeft + (viewX + cellWidth * toolTipIndex),
-                    height: viewHeight,
-                    pointerEvents: 'none',
-                    opacity: this.toolTipOpacityAnimation
-                }}
-            >
-                {
-                    this.props.hideToolTipHighlighterLine ? null:(
-                        <View 
-                            style={{
-                                height: "100%", 
-                                width: toolTipLineWidth, 
-                                backgroundColor: toolTipLineColor,
-                                position: 'absolute',
-                                transform: [{translateX: -toolTipLineWidth / 2}]
-                            }}  
-                        />
-                    )
-                }
-                
-                {
-                    this.props.hideToolTipHighlighterDot ? null:this.props.datasets.map(({values}, index) => {
-                        if(values[toolTipIndex] == undefined) return null
-                        let { y } = this.getCoords(values[toolTipIndex], index)
-                        let radius = toolTipDotRadius * 2 + toolTipDotStrokeWidth * 2
-
-                        return (
-                            <View 
-                                key={index}
+                <Animated.View
+                    style={{
+                        position: 'absolute',
+                        top: viewY,
+                        left: xAxisLableLeft + (viewX + cellWidth * toolTipIndex),
+                        height: viewHeight,
+                        pointerEvents: 'none',
+                        opacity: this.toolTipOpacityAnimation
+                    }}
+                >
+                    {
+                        this.props.hideToolTipHighlighterLine ? null : (
+                            <View
                                 style={{
-                                    height: radius,
-                                    width: radius,
-                                    borderRadius: radius,
-                                    backgroundColor: toolTipDotColor,
+                                    height: "100%",
+                                    width: toolTipLineWidth,
+                                    backgroundColor: toolTipLineColor,
                                     position: 'absolute',
-                                    transform: [{translateX: radius / 2 * -1}, {translateY: y - (radius / 2) - viewY}],
-                                    borderWidth: toolTipDotStrokeWidth,
-                                    borderColor: toolTipDotStrokeColor,
-                                }} 
+                                    transform: [{ translateX: -toolTipLineWidth / 2 }]
+                                }}
                             />
                         )
-                    })
-                }
-            </Animated.View>
-            <Animated.View
-                ref={this.toolTipRef}
-                style={[
-                    {
-                        position: 'absolute',
-                        backgroundColor: "white",
-                        elevation: 2,
-                        shadowOffset: {width: 0, height: 0},
-                        shadowColor: 'black',
-                        shadowRadius: 3,
-                        shadowOpacity: .2,
-                        justifyContent: 'center',
-                        top: viewY,
-                        left: xAxisLableLeft + viewX ,
-                        borderRadius: 3,
-                        transform: [{translateX: this.toolTipPositionAnimation.x}, {translateY: this.toolTipPositionAnimation.y}],
-                        pointerEvents: 'none',
-                        paddingHorizontal: 5,
-                        paddingVertical: 3,
-                        opacity: this.toolTipOpacityAnimation
                     }
-                ]}
-            >
-                {
-                    xAxisLable && (
-                        <View>
-                            <Text
-                                style={[{fontSize: 10, marginBottom: 3, fontWeight: 'bold', color: 'black', textAlign: 'center'}, this.props.toolTipXAxisLableTextStyle]}
-                                adjustsFontSizeToFit
-                                numberOfLines={1}
-                                {...this.props.toolTipXAxisLableTextProps}
-                            >
-                                {this.props.formatToolTipXAxisLable ? this.props.formatToolTipXAxisLable(xAxisLable):xAxisLable}
-                            </Text>
-                        </View>
-                    )
-                }
-                {
-                    this.props.datasets.map((data, index) => {
-                        let lable = data.values[toolTipIndex]
 
-                        let gredient = data.areaGradients ?? this.getProperty("areaGradients")
-                        let fill = data.areaFill ?? data.dotColor ?? data.lineColor ?? this.getProperty("areaFill")
+                    {
+                        this.props.hideToolTipHighlighterDot ? null : this.props.datasets.map(({ values }, index) => {
+                            if (values[toolTipIndex] == undefined) return null
+                            let { y } = this.getCoords(values[toolTipIndex], index)
+                            let radius = toolTipDotRadius * 2 + toolTipDotStrokeWidth * 2
 
-                        let toolTipYAxisLableBoxColor = fill || gredient[0].color
-                        return (
-                            <View style={{flexDirection: 'row', alignItems: 'center', gap: 5}} key={index}>
-                                {
-                                    this.props.hideToolTipYAxisLableBox ? null:(
-                                        <View style={[{height: 5, width: 10, backgroundColor: toolTipYAxisLableBoxColor, borderRadius: 3}, this.props.toolTipYAxisLableBoxStyle]} />
-                                    )
-                                }
+                            return (
+                                <View
+                                    key={index}
+                                    style={{
+                                        height: radius,
+                                        width: radius,
+                                        borderRadius: radius,
+                                        backgroundColor: toolTipDotColor,
+                                        position: 'absolute',
+                                        transform: [{ translateX: radius / 2 * -1 }, { translateY: y - (radius / 2) - viewY }],
+                                        borderWidth: toolTipDotStrokeWidth,
+                                        borderColor: toolTipDotStrokeColor,
+                                    }}
+                                />
+                            )
+                        })
+                    }
+                </Animated.View>
+                <Animated.View
+                    ref={this.toolTipRef}
+                    style={[
+                        {
+                            position: 'absolute',
+                            backgroundColor: "white",
+                            elevation: 2,
+                            shadowOffset: { width: 0, height: 0 },
+                            shadowColor: 'black',
+                            shadowRadius: 3,
+                            shadowOpacity: .2,
+                            justifyContent: 'center',
+                            top: viewY,
+                            left: xAxisLableLeft + viewX,
+                            borderRadius: 3,
+                            transform: [{ translateX: this.toolTipPositionAnimation.x }, { translateY: this.toolTipPositionAnimation.y }],
+                            pointerEvents: 'none',
+                            paddingHorizontal: 5,
+                            paddingVertical: 3,
+                            opacity: this.toolTipOpacityAnimation
+                        }
+                    ]}
+                >
+                    {
+                        xAxisLable && (
+                            <View>
                                 <Text
-                                    style={[{fontSize: 10, color: 'black'}, this.props.toolTipYAxisLableTextStyle]}
+                                    style={[{ fontSize: 10, marginBottom: 3, fontWeight: 'bold', color: 'black', textAlign: 'center' }, this.props.toolTipXAxisLableTextStyle]}
                                     adjustsFontSizeToFit
                                     numberOfLines={1}
-                                    {...this.props.toolTipYAxisLableTextProps}
+                                    {...this.props.toolTipXAxisLableTextProps}
                                 >
-                                    {this.props.formatToolTipYAxisLable ? this.props.formatToolTipYAxisLable(lable):lable}
+                                    {this.props.formatToolTipXAxisLable ? this.props.formatToolTipXAxisLable(xAxisLable) : xAxisLable}
                                 </Text>
                             </View>
-                            
                         )
-                    })
-                }
-            </Animated.View>
+                    }
+                    {
+                        this.props.datasets.map((data, index) => {
+                            let lable = data.values[toolTipIndex]
+
+                            let gredient = data.areaGradients ?? this.getProperty("areaGradients")
+                            let fill = data.areaFill ?? data.dotColor ?? data.lineColor ?? this.getProperty("areaFill")
+
+                            let toolTipYAxisLableBoxColor = fill || gredient[0].color
+                            return (
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }} key={index}>
+                                    {
+                                        this.props.hideToolTipYAxisLableBox ? null : (
+                                            <View style={[{ height: 5, width: 10, backgroundColor: toolTipYAxisLableBoxColor, borderRadius: 3 }, this.props.toolTipYAxisLableBoxStyle]} />
+                                        )
+                                    }
+                                    <Text
+                                        style={[{ fontSize: 10, color: 'black' }, this.props.toolTipYAxisLableTextStyle]}
+                                        adjustsFontSizeToFit
+                                        numberOfLines={1}
+                                        {...this.props.toolTipYAxisLableTextProps}
+                                    >
+                                        {this.props.formatToolTipYAxisLable ? this.props.formatToolTipYAxisLable(lable) : lable}
+                                    </Text>
+                                </View>
+
+                            )
+                        })
+                    }
+                </Animated.View>
             </>
         )
     }
-    handleScroll({nativeEvent}: {nativeEvent: NativeScrollEvent}) {
+    handleScroll({ nativeEvent }: { nativeEvent: NativeScrollEvent }) {
         let x = nativeEvent.contentOffset.x
-        if(this.xAxisScrollViewRef && this.xAxisScrollViewRef.current){
-            this.xAxisScrollViewRef.current.scrollTo({x, animated: false})
+        if (this.xAxisScrollViewRef && this.xAxisScrollViewRef.current) {
+            this.xAxisScrollViewRef.current.scrollTo({ x, animated: false })
         }
     }
     async handleTouchStart(event: NativeSyntheticEvent<NativeTouchEvent>) {
-      if(this.props.disableToolTip) return
-       await this.handleTouchMove(event)
+        if (this.props.disableToolTip) return
+        await this.handleTouchMove(event)
 
         Animated.timing(this.toolTipOpacityAnimation, {
             toValue: 1,
@@ -767,40 +780,40 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             useNativeDriver: true
         }).start()
     }
-    async handleTouchMove({nativeEvent}: {nativeEvent: NativeTouchEvent}){
-        if(this.props.disableToolTip) return
+    async handleTouchMove({ nativeEvent }: { nativeEvent: NativeTouchEvent }) {
+        if (this.props.disableToolTip) return
         let { cellWidth, viewHeight, viewWidth } = this.getSvgLayout()
 
         let { locationX } = nativeEvent
 
-        if(this.getProperty('xAxisLableInset')){
+        if (this.getProperty('xAxisLableInset')) {
             let xAxisLableLeft = (this.props.xAxisLableWidth || cellWidth) / 2
-            if(this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
+            if (this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
             locationX = locationX - xAxisLableLeft
         }
 
         let maxLength = this.getDataSetProperty().maxLength()
-        let index = Math.max(0, Math.min(maxLength-1, Math.round(locationX / cellWidth)))
+        let index = Math.max(0, Math.min(maxLength - 1, Math.round(locationX / cellWidth)))
 
-        this.setState(prev => ({...prev, toolTipIndex: index}))
+        this.setState(prev => ({ ...prev, toolTipIndex: index }))
 
-        if(this.toolTipIndexPrev == index) return
-        
-        let [toolTipWidth, 
+        if (this.toolTipIndexPrev == index) return
+
+        let [toolTipWidth,
             toolTipHeight,
-            toolTipTouchXDistance, 
-            toolTipTouchYDistance, 
+            toolTipTouchXDistance,
+            toolTipTouchYDistance,
             toolTipPosition] = this.getProperties(
-            "toolTipWidth", 
-            "toolTipHeight",
-            "toolTipTouchXDistance", 
-            "toolTipTouchYDistance", 
-            "toolTipPosition") 
+                "toolTipWidth",
+                "toolTipHeight",
+                "toolTipTouchXDistance",
+                "toolTipTouchYDistance",
+                "toolTipPosition")
 
 
-        if(!toolTipWidth || !toolTipHeight){
-            let results = await new Promise<{toolTipWidth: number, toolTipHeight: number}>((res, rej) => {
-                this.toolTipRef.current?.measure((x, y, w, h) => res({toolTipWidth: w, toolTipHeight: h}))
+        if (!toolTipWidth || !toolTipHeight) {
+            let results = await new Promise<{ toolTipWidth: number, toolTipHeight: number }>((res, rej) => {
+                this.toolTipRef.current?.measure((x, y, w, h) => res({ toolTipWidth: w, toolTipHeight: h }))
             })
             toolTipWidth = results.toolTipWidth
             toolTipHeight = results.toolTipHeight
@@ -812,16 +825,16 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         let x = posX
         let y = posY
 
-        if(toolTipPosition == "top-left"){
+        if (toolTipPosition == "top-left") {
             x -= toolTipWidth + toolTipTouchXDistance
             y -= toolTipHeight + toolTipTouchYDistance
-        }else if(toolTipPosition == "bottom-left"){
+        } else if (toolTipPosition == "bottom-left") {
             x -= toolTipWidth + toolTipTouchXDistance
             y += toolTipTouchYDistance
-        }else if(toolTipPosition == "top-right"){
+        } else if (toolTipPosition == "top-right") {
             x += toolTipTouchXDistance
             y -= toolTipHeight + toolTipTouchYDistance
-        }else if(toolTipPosition == "bottom-right"){
+        } else if (toolTipPosition == "bottom-right") {
             x += toolTipTouchXDistance
             y += toolTipTouchYDistance
         }
@@ -831,21 +844,21 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         let isOutFromBottom = y > viewHeight - toolTipHeight - toolTipTouchYDistance
         let isOutFromRight = x > viewWidth - toolTipWidth - toolTipTouchXDistance
 
-        if(isOutFromTop) y = toolTipTouchYDistance
-        if(isOutFromLeft) x = posX + toolTipTouchXDistance
-        if(isOutFromBottom) y = viewHeight - toolTipHeight - toolTipTouchYDistance
-        if(isOutFromRight) x = posX - toolTipWidth - toolTipTouchXDistance
+        if (isOutFromTop) y = toolTipTouchYDistance
+        if (isOutFromLeft) x = posX + toolTipTouchXDistance
+        if (isOutFromBottom) y = viewHeight - toolTipHeight - toolTipTouchYDistance
+        if (isOutFromRight) x = posX - toolTipWidth - toolTipTouchXDistance
 
         Animated.timing(this.toolTipPositionAnimation, {
-            toValue: {x, y},
+            toValue: { x, y },
             duration: this.getProperty("toolTipMoveAnimationDuration"),
             useNativeDriver: true
         }).start()
-        
+
         this.toolTipIndexPrev = index
     }
-    handleTouchEnd(event: NativeSyntheticEvent<NativeTouchEvent | NativeScrollEvent>){
-        if(this.props.disableToolTip) return
+    handleTouchEnd(event: NativeSyntheticEvent<NativeTouchEvent | NativeScrollEvent>) {
+        if (this.props.disableToolTip) return
         Animated.timing(this.toolTipOpacityAnimation, {
             toValue: 0,
             duration: this.getProperty("toolTipOpacityAnimationDuration"),
@@ -859,7 +872,7 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
 
         let inset = this.getProperty('xAxisLableInset')
         let halfXAxisLableWidth = (this.props.xAxisLableWidth || cellWidth) / 2
-        let paddingRight = inset ? 0:'xAxisLables' in this.props  ? halfXAxisLableWidth:0
+        let paddingRight = inset ? 0 : 'xAxisLables' in this.props ? halfXAxisLableWidth : 0
 
         let isLayoutScrollable = Math.round(viewWidth - paddingRight) != overAllWidth
         let scrollEnabled = 'scrollEnabled' in this.props ? this.props.scrollEnabled : isLayoutScrollable
@@ -871,7 +884,7 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                     <ScrollView
                         ref={this.scrollViewRef}
                         style={{ flex: 1 }}
-                        contentContainerStyle={{flexGrow: 1, paddingRight}}
+                        contentContainerStyle={{ flexGrow: 1, paddingRight }}
                         onLayout={({ nativeEvent }) => {
                             let { height, width, x, y } = nativeEvent.layout
                             this.setState(prev => ({
@@ -881,7 +894,7 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                                 viewX: x,
                                 viewY: y
                             }))
-                            if('onLoadingSuccess' in this.props){
+                            if ('onLoadingSuccess' in this.props) {
                                 this.props.onLoadingSuccess()
                             }
                         }}
