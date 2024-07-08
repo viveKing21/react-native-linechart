@@ -1,0 +1,44 @@
+{
+  "name": "react-native-linechart",
+  "version": "1.0.0",
+  "description": "A lightweight and customizable line chart component for React Native, enabling easy data visualization with interactive tooltips and responsive design.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "start": "react-scripts start",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viveKing21/react-native-linechart.git"
+  },
+  "keywords": [
+    "react-naitve-linechart",
+    "linechart",
+    "graph"
+  ],
+  "author": "Vivek Sharma <sharma.vivek.dev@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viveKing21/react-native-linechart/issues"
+  },
+  "dependencies": {
+    "react-native": "^0.74.3"
+  },
+  "homepage": "https://github.com/viveKing21/react-native-linechart/blob/main/README.md",
+  "files": [
+    "lib/**/*"
+  ],
+  "peerDependencies": {
+    "react-native-svg": "^15.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-native": "^0.73.0",
+    "typescript": "^5.5.3",
+    "react-native-svg": "^15.3.0"
+  }
+}
