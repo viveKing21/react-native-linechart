@@ -631,7 +631,9 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             toolTipDotStrokeColor,
             toolTipDotStrokeWidth,
             toolTipDotRadius,
-            xAxisLableInset
+            xAxisLableInset,
+            toolTipHeight,
+            toolTipWidth
         ] = this.getProperties(
             'toolTipLineWidth',
             'toolTipLineColor',
@@ -639,7 +641,9 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
             'toolTipDotStrokeColor',
             'toolTipDotStrokeWidth',
             'toolTipDotRadius',
-            'xAxisLableInset')
+            'xAxisLableInset',
+            'toolTipHeight',
+            'toolTipWidth')
 
         let xAxisLableLeft = xAxisLableInset ? ((this.props.xAxisLableWidth || cellWidth) / 2) : 0
         if (this.getProperty('xAxisLableEqualInset')) xAxisLableLeft = cellWidth
@@ -714,7 +718,9 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
                             pointerEvents: 'none',
                             paddingHorizontal: 5,
                             paddingVertical: 3,
-                            opacity: this.toolTipOpacityAnimation
+                            opacity: this.toolTipOpacityAnimation,
+                            height: toolTipHeight,
+                            width: toolTipWidth
                         }
                     ]}
                 >
@@ -825,16 +831,16 @@ export default class LineChart extends PureComponent<LineChartProps, LineChartSt
         let x = posX
         let y = posY
 
-        if (toolTipPosition == "top-left") {
+        if (toolTipPosition == POSITION.TOP_LEFT) {
             x -= toolTipWidth + toolTipTouchXDistance
             y -= toolTipHeight + toolTipTouchYDistance
-        } else if (toolTipPosition == "bottom-left") {
+        } else if (toolTipPosition == POSITION.BOTTOM_LEFT) {
             x -= toolTipWidth + toolTipTouchXDistance
             y += toolTipTouchYDistance
-        } else if (toolTipPosition == "top-right") {
+        } else if (toolTipPosition == POSITION.TOP_RIGHT) {
             x += toolTipTouchXDistance
             y -= toolTipHeight + toolTipTouchYDistance
-        } else if (toolTipPosition == "bottom-right") {
+        } else if (toolTipPosition == POSITION.BOTTOM_RIGHT) {
             x += toolTipTouchXDistance
             y += toolTipTouchYDistance
         }
