@@ -1,6 +1,6 @@
 {
   "name": "rn-linechart",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A lightweight and customizable line chart component for React Native, enabling easy data visualization with interactive tooltips and responsive design.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
