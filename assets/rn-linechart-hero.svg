@@ -1,0 +1,112 @@
+<svg viewBox="0 0 900 280" xmlns="http://www.w3.org/2000/svg" width="900" height="280">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0533"/>
+      <stop offset="50%" stop-color="#0d0d2b"/>
+      <stop offset="100%" stop-color="#001233"/>
+    </linearGradient>
+    <linearGradient id="line3a" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6b6b"/>
+      <stop offset="100%" stop-color="#feca57"/>
+    </linearGradient>
+    <linearGradient id="fill3a" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="line3b" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#48dbfb"/>
+      <stop offset="100%" stop-color="#ff9ff3"/>
+    </linearGradient>
+    <linearGradient id="fill3b" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#48dbfb" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#48dbfb" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow3">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+    <clipPath id="chartClip">
+      <rect x="490" y="40" width="380" height="200"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="280" fill="url(#bg3)"/>
+
+  <!-- Glow -->
+  <ellipse cx="680" cy="140" rx="220" ry="140" fill="#ff6b6b" opacity="0.06" filter="url(#glow3)"/>
+  <ellipse cx="780" cy="80" rx="120" ry="80" fill="#48dbfb" opacity="0.09" filter="url(#glow3)"/>
+
+  <!-- Phone frame -->
+  <rect x="490" y="28" rx="24" ry="24" width="240" height="220" fill="#0d0d2b" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.15"/>
+  <!-- Phone notch -->
+  <rect x="578" y="28" rx="6" ry="6" width="64" height="12" fill="#0d0d2b" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+  <!-- Phone screen inner -->
+  <rect x="502" y="50" rx="8" ry="8" width="216" height="186" fill="#0a0a1f"/>
+
+  <!-- Chart area clipped to phone -->
+  <g clip-path="url(#chartClip)">
+    <!-- Grid lines -->
+    <line x1="502" y1="95" x2="718" y2="95" stroke="#ffffff" stroke-width="0.5" opacity="0.07"/>
+    <line x1="502" y1="130" x2="718" y2="130" stroke="#ffffff" stroke-width="0.5" opacity="0.07"/>
+    <line x1="502" y1="165" x2="718" y2="165" stroke="#ffffff" stroke-width="0.5" opacity="0.07"/>
+    <line x1="502" y1="200" x2="718" y2="200" stroke="#ffffff" stroke-width="0.5" opacity="0.07"/>
+    
+    <!-- Fill area A -->
+    <path d="M510,180 C530,170 545,120 565,115 C585,110 605,140 625,130 C645,120 665,90 685,95 C700,100 710,105 718,100 L718,236 L510,236 Z"
+          fill="url(#fill3a)"/>
+    <!-- Line A (coral/warm) -->
+    <path d="M510,180 C530,170 545,120 565,115 C585,110 605,140 625,130 C645,120 665,90 685,95 C700,100 710,105 718,100"
+          fill="none" stroke="url(#line3a)" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Fill area B -->
+    <path d="M510,200 C530,195 545,175 565,165 C585,155 605,170 625,160 C645,150 665,130 685,125 C700,120 710,118 718,115 L718,236 L510,236 Z"
+          fill="url(#fill3b)"/>
+    <!-- Line B (cyan/blue) -->
+    <path d="M510,200 C530,195 545,175 565,165 C585,155 605,170 625,160 C645,150 665,130 685,125 C700,120 710,118 718,115"
+          fill="none" stroke="url(#line3b)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Data points on line A -->
+    <circle cx="565" cy="115" r="4" fill="#feca57" stroke="#1a0533" stroke-width="1.5"/>
+    <circle cx="625" cy="130" r="4" fill="#feca57" stroke="#1a0533" stroke-width="1.5"/>
+    <circle cx="685" cy="95" r="4" fill="#ff6b6b" stroke="#1a0533" stroke-width="1.5"/>
+
+    <!-- Tooltip -->
+    <rect x="662" y="70" rx="5" ry="5" width="55" height="22" fill="#1e1b4b" stroke="#feca57" stroke-width="1" opacity="0.95"/>
+    <text x="689" y="81" font-family="monospace" font-size="7" fill="#feca57" text-anchor="middle">Week 6</text>
+    <text x="689" y="89" font-family="monospace" font-size="7" fill="#ffffff" text-anchor="middle">val: 95</text>
+    <line x1="685" y1="93" x2="685" y2="95" stroke="#feca57" stroke-width="1"/>
+
+    <!-- Chart label inside phone -->
+    <text x="520" y="65" font-family="monospace" font-size="9" fill="#ff6b6b" opacity="0.9">● Series A</text>
+    <text x="580" y="65" font-family="monospace" font-size="9" fill="#48dbfb" opacity="0.9">● Series B</text>
+  </g>
+
+  <!-- Right: second abstract mini-chart -->
+  <rect x="760" y="60" rx="12" ry="12" width="110" height="80" fill="#0a0a1f" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+  <path d="M772,120 C780,110 790,90 800,88 C810,86 820,100 830,95 C840,90 850,80 860,82"
+        fill="none" stroke="#ff9ff3" stroke-width="2" opacity="0.7"/>
+  <path d="M772,125 C780,120 790,110 800,108 C810,106 820,115 830,110 C840,105 850,95 860,97"
+        fill="none" stroke="#48dbfb" stroke-width="1.5" opacity="0.5" stroke-dasharray="4,3"/>
+  <text x="815" y="155" font-family="monospace" font-size="8" fill="#ffffff" text-anchor="middle" opacity="0.4">preview</text>
+
+  <!-- Left: title -->
+  <rect x="48" y="55" width="4" height="65" rx="2" fill="url(#line3a)"/>
+  <text x="68" y="86" font-family="Georgia, serif" font-size="32" fill="#ffffff" font-weight="700" letter-spacing="-0.5">rn-linechart</text>
+  <text x="68" y="110" font-family="monospace" font-size="12" fill="#48dbfb">React Native · Smooth Animations · Zero Deps</text>
+
+  <text x="68" y="148" font-family="Georgia, serif" font-size="13" fill="#c0b8d4" opacity="0.9">Beautiful line charts for React Native.</text>
+  <text x="68" y="166" font-family="Georgia, serif" font-size="13" fill="#c0b8d4" opacity="0.9">Fluid animations, no native dependencies.</text>
+
+  <!-- Badges -->
+  <rect x="68" y="192" rx="10" ry="10" width="80" height="20" fill="#ff6b6b" opacity="0.12" stroke="#ff6b6b" stroke-width="1"/>
+  <text x="108" y="205" font-family="monospace" font-size="8" fill="#feca57" text-anchor="middle">npm install</text>
+
+  <rect x="158" y="192" rx="10" ry="10" width="56" height="20" fill="#48dbfb" opacity="0.1" stroke="#48dbfb" stroke-width="1"/>
+  <text x="186" y="205" font-family="monospace" font-size="8" fill="#48dbfb" text-anchor="middle">MIT License</text>
+
+  <rect x="224" y="192" rx="10" ry="10" width="84" height="20" fill="#a78bfa" opacity="0.1" stroke="#a78bfa" stroke-width="1"/>
+  <text x="266" y="205" font-family="monospace" font-size="8" fill="#c4b5fd" text-anchor="middle">Android + iOS</text>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="270" width="900" height="10" fill="url(#line3a)" opacity="0.4"/>
+</svg>
